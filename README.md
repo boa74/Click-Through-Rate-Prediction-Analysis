@@ -3,73 +3,47 @@ Welcome to the CTR prediction project repository. This project focuses on predic
 
 ## Project Overview
 
-Objective: Predict user click-through rate (CTR) from advertising metadata.
+- Objective: Predict user click-through rate (CTR) from advertising metadata.
 
-Tools Used: R, caret, ggplot2, fastDummies, xgboost, randomForest, gbm
+- Tools Used: R, caret, ggplot2, fastDummies, xgboost, randomForest, gbm
 
-Dataset: Includes 28 independent variables (numeric and categorical) and CTR as the target.
+- Dataset: Includes 28 independent variables (numeric and categorical) and CTR as the target.
 
 ## Repository Contents
 
-PAC_FINAL2.Rmd - Main RMarkdown source file for analysis
+- PAC_BKIM.Rmd - Main RMarkdown source file for analysis
 
-PAC_BKIM.html - Knit HTML output for the full report
+- PAC_BKIM.html - Knit HTML output for the full report
 
-images/ - Folder with plots used in README and report
+- PAC_BKIM.PDF 
 
 ## Data Cleaning and Feature Engineering
 
-Median/mode imputation for missing values
+- Median/mode imputation for missing values
 
-Dummy variable creation for 8 categorical features
+- Dummy variable creation for 8 categorical features
 
-Removed highly correlated predictors (|r| > 0.85)
+- Removed highly correlated predictors `(|r| > 0.85)`
 
-Feature selection via Stepwise Regression and VIF
+- Feature selection via Stepwise Regression and VIF
 
 ## Modeling Approaches
 
-### Model
+## Model Performance Summary (RMSE)
 
-Train RMSE
+| Model                 | Train RMSE | Test RMSE | Notes                      |
+|-----------------------|------------|-----------|----------------------------|
+| Linear Regression     | 0.106      | 0.157     | Baseline model             |
+| Polynomial Regression | 0.090      | 0.167     | Slightly better train fit  |
+| Ridge Regression      | 0.085      | 0.150     | Reduced overfitting        |
+| **Decision Tree**     | 0.116      | 0.144     | Simple tree                |
+| **Tuned Tree**        | 0.095      | 0.129     | Cross-validated            |
+| Random Forest         | 0.110      | 0.129     | Ensemble, reduced variance |
+| Bagging               | 0.113      | 0.133     | Ensemble, simpler          |
+| **GBM**               | 0.090      | 0.120     | Better generalization      |
+| **XGBoost**           | **0.008**  | **0.220** | Overfitting observed       |
 
-Test RMSE
-
-Decision Tree
-
-0.116
-
-0.144
-
-Tuned Decision Tree
-
-0.095
-
-0.129
-
-Random Forest
-
-0.110
-
-0.129
-
-Bagging
-
-0.113
-
-0.133
-
-GBM
-
-0.090
-
-0.120
-
-XGBoost (final)
-
-0.008
-
-0.220
+Although XGBoost achieved the lowest training RMSE (0.008), its test RMSE (0.220) was significantly higher, indicating overfitting. GBM, on the other hand, maintained a strong balance between train and test performance (0.090 / 0.120), making it a more generalizable and reliable model.
 
 ## Final Model: Tuned XGBoost
 
