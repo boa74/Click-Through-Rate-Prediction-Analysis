@@ -54,29 +54,29 @@ Reduced overfitting using early_stopping_rounds and hyperparameter tuning (eta, 
 ## Key Visualizations
 
 ### Feature Importance
-RMSE by Model
-CTR vs Targeting Score
+- RMSE by Model
+- CTR vs Targeting Score
 
 
 
 ## Key Insights
 
-Tree-based models outperformed linear models due to categorical richness
+- Tree-based models outperformed linear models due to categorical richness
 
-XGBoost demonstrated strongest fit but needed tuning to reduce overfitting
+- XGBoost demonstrated strongest fit but needed tuning to reduce overfitting
 
-Feature engineering and selection significantly improved model accuracy
+- Feature engineering and selection significantly improved model accuracy
 
 ## What I Learned
 
-Hands-on experience tuning GBM/XGBoost using caret
+- Hands-on experience tuning GBM/XGBoost using caret
 
-Data preparation workflow with dummy encoding and VIF filtering
+- Data preparation workflow with dummy encoding and VIF filtering
 
-Communicating modeling trade-offs using visualization and RMSE comparison
+- Communicating modeling trade-offs using visualization and RMSE comparison
 
 ## How to View
 
-HTML Report Preview
+- HTML Report Preview(PDF FILE)
 
-Clone and knit PAC_FINAL2.Rmd using RStudio
+- Clone and knit PAC_FINAL2.Rmd using RStudio
