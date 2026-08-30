@@ -1,6 +1,8 @@
 ---
-#title: "PAC Project"
-output: html_document
+title: "PAC Project"
+output: 
+  github_document:
+    toc: true
 date: "2024-11-21"
 ---
 
@@ -45,7 +47,7 @@ The primary objective of this analysis is to identify the most accurate predicti
 
 ### 4. Data Exploration
 
-```r
+```{r data-exploration, eval=FALSE}
 # Explore dataset summary
 summary(analysis)
 
@@ -65,22 +67,52 @@ print(missing_values)
 
 - Generating Dummy Variables:
 
-```r
+```{r dummy-variables, eval=FALSE}
 library(fastDummies)
 analysis <- dummy_cols(analysis, select_columns = c("ad_format", "age_group", "day_of_week", "location", "gender", "device_type", "position_on_page", "time_of_day"),remove_first_dummy = TRUE)
 analysis <- analysis %>% select(-c("ad_format", "age_group", "day_of_week", "location","gender", "device_type", "position_on_page", "time_of_day"))
 ```
 - Column Name Formatting:
 
-```r
+```{r column-formatting, eval=FALSE}
 colnames(analysis) <- make.names(colnames(analysis))
 ```
+
+- Exploratory Data Visualizations
+
+The following plot shows the distributions of selected predictors:
+
+```{r distribution-plot, eval=FALSE, fig.width=10, fig.height=8}
+library(ggplot2)
+library(reshape2)
+library(dplyr)
+
+# select variables
+selected_vars <- c("ad_format_Image", "ad_format_Text", "body_sentiment", "contextual_relevance", 
+                   "cta_strength", "headline_length", "location_South", "location_West", 
+                   "position_on_page_In_Content", "position_on_page_Side_Bar", "targeting_score", 
+                   "time_of_day_Morning", "visual_appeal")
+
+
+df_selected <- analysis %>% select(all_of(selected_vars))
+
+# long format
+df_long <- melt(df_selected)
+
+ggplot(df_long, aes(x = value)) +
+  geom_histogram(bins = 30, fill = "skyblue", color = "black") +
+  facet_wrap(~variable, scales = "free", ncol = 4) +
+  theme_minimal() +
+  labs(title = "Distribution of Key Variables")
+```
+
+
 - Multicollinearity Check:
    - Pairwise correlations computed, and variables with correlation > 0.85 were removed to address redundancy.
 
 ```r
 cor_matrix <- cor(analysis %>% select_if(is.numeric))
-high_cor <- findCorrelation(cor_matrix, cutoff = 0.85)
+hig{r multicollinearity, eval=FALSE}_cor <- findCorrelation(cor_matrix, cutoff = 0.85)
 analysis <- analysis %>% select(-names(high_cor))
 ```
 
@@ -91,7 +123,7 @@ analysis <- analysis %>% select(-names(high_cor))
 
 ```r
 library(caret)
-set.seed(1031)
+set{r data-split, eval=FALSE}seed(1031)
 split <- createDataPartition(y = analysis$CTR, p = 0.7, list = FALSE)
 train <- analysis[split, ]
 test <- analysis[-split, ]
@@ -111,14 +143,14 @@ test <- analysis[-split, ]
 
 ```r
 lm_model <- lm(CTR ~ ., data = train)
-```
+```{r linear-regression, eval=FALSE}
    - Therefore, I applied polynomial regression using 2-3 important variables identified through the summary of the lm_model. However, the results showed that while the model achieved an R squared of 0.42, indicating moderate explanatory power, it also had the highest RMSE, suggesting it was less effective in prediction accuracy.
 
  - C. Decision Trees and Tuned Trees:
  
    - While exploring tree models, the RMSE decreased noticeably, indicating improved predictive performance. I assumed that the data likely contains a significant number of qualitative variables serving as important predictors. However, it is worth noting that tree models typically do not achieve the same level of accuracy as linear regression for datasets with strong linear relationships.
 
-```r
+```{r decision-trees, eval=FALSE}
 library(rpart)
 tree <- rpart(CTR ~ ., data = train, method = "anova")
 
@@ -134,7 +166,7 @@ tuned_tree <- train(CTR ~ ., data = train, method = "rpart", trControl = trContr
    - Random Forest: Since bagging can overemphasize a few strong predictors when variables are highly correlated, I employed Random Forest, which introduces randomness by selecting a subset of predictors at each split, thereby mitigating this bias.
    - Boosting: Boosting iteratively improves model performance by learning from errors of previous models and adjusting sequentially. By tuning hyperparameters, this method can significantly increase accuracy.
    
-```r
+```{r random-forest-bagging, eval=FALSE}
 library(randomForest)
 rf_model <- randomForest(CTR ~ ., data = train, ntree = 100)
 rf_predictions <- predict(rf_model, test)
@@ -149,7 +181,7 @@ bag_model <- bagging(CTR ~ ., data = train, nbagg = 100)
     - The tuned boosting model has a higher likelihood of achieving the lowest RMSE.
 By adjusting the shrinkage parameter, I controlled the learning rate of the boosting algorithm, ensuring a more gradual and effective improvement in model performance.
 
-```r
+```{r gradient-boosting, eval=FALSE}
 library(gbm)
 boost <- gbm(CTR ~ ., data = train, distribution = "gaussian", n.trees = 100, 
              interaction.depth = 2, shrinkage = 0.01)
@@ -159,7 +191,7 @@ boost_rmse <- sqrt(mean((boost_predictions - test$CTR)^2))
 
   - F. Tuned Boosting and XGBoost:
 
-```r
+```{r xgboost, eval=FALSE}
 library(caret)
 tuned_gbm <- train(CTR ~ ., data = train, method = "gbm", trControl = trControl, tuneGrid = tuneGrid)
 xgb_model <- xgboost(data = as.matrix(train %>% select(-CTR)), label = train$CTR, 
@@ -188,7 +220,7 @@ xgb_model <- xgboost(data = as.matrix(train %>% select(-CTR)), label = train$CTR
      
   - Key Visualizations
 
-```r
+```{r visualizations, eval=FALSE, fig.width=8, fig.height=6}
 library(ggplot2)
 # CTR vs Targeting Score
 ggplot(data = analysis, aes(x = targeting_score, y = CTR)) +
@@ -198,7 +230,10 @@ ggplot(data = analysis, aes(x = targeting_score, y = CTR)) +
        x = "Targeting Score",
        y = "Click-Through Rate (CTR)") +
   theme_minimal()
-  
+```
+
+```{r rmse-plot, echo=FALSE, fig.width=8, fig.height=6}
+library(ggplot2)
 # RMSE Comparison Plot
 rmse_df <- data.frame(
   Model = c("Decision Tree", "Tuned Tree", "Random Forest", "Bagging", "GBM", "XGBoost"),
@@ -212,8 +247,9 @@ ggplot(rmse_df, aes(x = reorder(Model, RMSE), y = RMSE)) +
        x = "Model",
        y = "Test RMSE") +
   theme_minimal()
-  
-# Feature Importance (requires final_model)
+```
+
+```{r feature-importance, eval=FALSE, fig.width=8, fig.height=6}
 importance_matrix <- xgb.importance(model = final_model)
 xgb.plot.importance(importance_matrix, top_n = 10)
 ```
@@ -227,7 +263,7 @@ xgb.plot.importance(importance_matrix, top_n = 10)
 
 - This approach balanced performance and complexity, resulting in a more accurate and efficient model.
 
-```r
+```{r data-prep-final, eval=FALSE}
 # data cleaning and preparation
 trt = designTreatmentsZ(dframe = analysis, varlist = names(analysis)[2:6])
 #Select the variables that are either clean numeric variables or leveled dummy variables.
@@ -240,6 +276,9 @@ test_input = prepare(treatmentplan = trt,
                       dframe = scoring,
                       varRestriction = newvars)
 head(train_input)
+```
+
+```
   targeting_score visual_appeal contextual_relevance headline_length cta_strength
 1               4      1.118593                    0              73            0
 2               3      4.890355                    0              93            3
@@ -247,6 +286,9 @@ head(train_input)
 4               6      4.838057                    0              93            5
 5               3      1.358385                    0              79            3
 6               3      6.288383                    0              92            5
+```
+
+```{r xgboost-final, eval=FALSE}
 library(xgboost)
 set.seed(617) 
 #Create a DMatrix for training data
@@ -272,7 +314,6 @@ early_stopping_rounds = 50,   # Early stopping to prevent overfitting
 metrics = "rmse",             # Root Mean Squared Error as the evaluation metric
 verbose = 1                   # Display progress during training
 )
-
 ```
 
 
